@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZIP Codes for {{ location }}</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ZIP Codes for {{ location }}</h1>
+
+        <!-- Table for ZIP Codes -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ZIP Code</th>
+                    <th>Total Beneficiaries</th>
+                    <th>Avg_Stdzd_Amt_per_service</th>
+                    <th>Patients_Served (Mln)</th>
+                    <th>Avg_Risk_Scre</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for zip_code in zip_codes.itertuples() %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('providers', zip_code=zip_code.Rndrng_Prvdr_Zip5) }}">
+                            {{ zip_code.Rndrng_Prvdr_Zip5 }}
+                        </a>
+                    </td>
+                    <td>{{ zip_code.Total_Benes }}</td>
+                    <td>{{ zip_code.Avg_Mdcr_Stdzd_Amt_per_service }}</td>
+                    <td>{{ zip_code.Patients_Served_in_Millions }}</td>
+                    <td>{{ zip_code.Avg_Risk_Scre }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

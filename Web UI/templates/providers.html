@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Providers for Zip Code {{ zip_code }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <style>
+        #map { height: 500px; width: 100%; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+<h1>Providers for Zip Code {{ zip_code }}</h1>
+<p>City: {{ Rndrng_Prvdr_City_New }}, State: {{ Rndrng_Prvdr_State_NAME }}</p>
+        <div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>Provider Name (OpenStreetMap)</th>
+                <th>Provider Name (Google Maps)</th>
+                <th>Address</th>
+                <th>Patients_Served (Mln)</th>
+                <th>Avg_Stdzd_Amt_per_service</th>
+                <th>Avg_Risk_Scre</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for provider in top_providers.itertuples() %}
+            <tr>
+                <td>
+                    <a href="https://www.openstreetmap.org/search?query={{ provider.Rndrng_Prvdr_St1 | urlencode }}%2C+{{ provider.Rndrng_Prvdr_City | urlencode }}%2C+{{ provider.Rndrng_Prvdr_State_NAME | urlencode }}%2C+{{ provider.Rndrng_Prvdr_Zip5 | urlencode }}" target="_blank">
+                            {{ provider.Rndrng_Prvdr_First_Name }} {{ provider.Rndrng_Prvdr_Last_Org_Name }}
+                    </a>
+                </td>
+                <td>
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ provider.Rndrng_Prvdr_St1 | urlencode }},+{{ provider.Rndrng_Prvdr_City | urlencode }},+{{ provider.Rndrng_Prvdr_State_NAME | urlencode }},+{{ provider.Rndrng_Prvdr_Zip5 | urlencode }}" target="_blank">
+                            {{ provider.Rndrng_Prvdr_First_Name }} {{ provider.Rndrng_Prvdr_Last_Org_Name }}
+                    </a>
+                </td>
+                <td>{{ provider.Rndrng_Prvdr_St1 }} , {{ provider.Rndrng_Prvdr_St2 }}</td>
+                <td>{{ provider.Patients_Served_in_Millions }}  </td>
+                <td>{{ provider.Avg_Mdcr_Stdzd_Amt_per_service }}  </td>
+                <td>{{ provider.Avg_Risk_Scre }}  </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h1>Map View for Results</h1>
+<!-- Map -->
+<div id="map"></div>
+
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([20, 77], 5); // Default center coordinates, can adjust
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Add markers for each provider's location
+    {% for idx, row in top_providers.iterrows() %}
+    if ({{ row['latitude2'] }} && {{ row['longitude2'] }}) {
+        L.marker([{{ row['latitude2'] }}, {{ row['longitude2'] }}])
+            .bindPopup('<b>{{ row["Rndrng_Prvdr_First_Name"] }} {{ row["Rndrng_Prvdr_Last_Org_Name"] }}</b><br>{{ row["Rndrng_Prvdr_St1"] }}<br>{{ row["Rndrng_Prvdr_City_New"] }}')
+            .addTo(map);
+    }
+    {% endfor %}
+
+    // Adjust the map view to fit all markers
+    var bounds = new L.LatLngBounds([]);
+    {% for idx, row in top_providers.iterrows() %}
+    if ({{ row['latitude2'] }} && {{ row['longitude2'] }}) {
+        bounds.extend([{{ row['latitude2'] }}, {{ row['longitude2'] }}]);
+    }
+    {% endfor %}
+    if (bounds.isValid()) {
+        map.fitBounds(bounds);
+    }
+</script>
+            </div>
+</body>
+</html>

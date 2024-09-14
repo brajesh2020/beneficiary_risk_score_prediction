@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State Search</title>
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .tables-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        td a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Search for States, City or Provider Type</h1>
+        <form action="/" method="POST">
+            <label for="location">Enter State Name or Abbreviation:</label>
+            <input type="text" id="location" name="location" required>
+            <button type="submit">Search</button>
+        </form>
+        <div class="tables-container">
+            <!-- Table for States -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th> <!-- Row number column -->
+                        <th>State Name (Abbreviation)</th>
+                        <th>Patients (Millions)</th>
+                        <th>Avg_Amt</th>
+                        <th>Avg Risk Score</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for idx, state in enumerate(top_states.itertuples(), start=1) %}
+                    <tr>
+                        <td>{{ idx }}</td> <!-- Display the row number -->
+                        <td>
+                            <!-- Link to ZIP codes using state abbreviation -->
+                            <a href="{{ url_for('zip_codes', location=state.Rndrng_Prvdr_State_Abrvtn) }}">
+                                {{ state.Rndrng_Prvdr_State_NAME }} ({{ state.Rndrng_Prvdr_State_Abrvtn }})
+                            </a>
+                        </td>
+                        <td>{{ state.Patients_Served_in_Millions }}</td>
+                        <td>{{ state.Avg_Mdcr_Stdzd_Amt_per_service }}</td>
+                        <td>{{ state.Avg_Risk_Scre }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Table for Cities -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th> <!-- Row number column -->
+                        <th>City Name</th>
+                        <th>Patients (Millions)</th>
+                        <th>Avg_Mdcr_Stdzd_Amt_per_service</th>
+                        <th>Avg Risk Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for idx, city in enumerate(top_cities.itertuples(), start=1) %}
+                    <tr>
+                        <td>{{ idx }}</td> <!-- Display the row number -->
+                        <td>
+                            <!-- Link to ZIP codes using the city name (URL-encoded to handle spaces) -->
+                            <a href="{{ url_for('zip_codes', location=city.Rndrng_Prvdr_City_New | urlencode) }}">
+                                {{ city.Rndrng_Prvdr_City_New }}
+                            </a>
+                        </td>
+                        <td>{{ city.Patients_Served_in_Millions }} </td>
+                        <td>{{ city.Avg_Mdcr_Stdzd_Amt_per_service }}</td>
+                        <td>{{ city.Avg_Risk_Scre }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Table for Provider Types -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th> <!-- Row number column -->
+                        <th>Provider Type</th>
+                        <th>Patients (Millions)</th>
+                        <th>Avg_Mdcr_Stdzd_Amt_per_service</th>
+                        <th>Avg Risk Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for idx, provider_type in enumerate(top_provider_type.itertuples(), start=1) %}
+                    <tr>
+                        <td>{{ idx }}</td> <!-- Display the row number -->
+                        <td>
+                            <!-- Link to ZIP codes using provider type (URL-encoded to handle spaces) -->
+                            <a href="{{ url_for('zip_codes', location=provider_type.Rndrng_Prvdr_Type | urlencode) }}">
+                                {{ provider_type.Rndrng_Prvdr_Type }}
+                            </a>
+                        </td>
+                        <td>{{ provider_type.Patients_Served_in_Millions }} </td>
+                        <td>{{ provider_type.Avg_Mdcr_Stdzd_Amt_per_service }}</td>
+                        <td>{{ provider_type.Avg_Risk_Scre }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
